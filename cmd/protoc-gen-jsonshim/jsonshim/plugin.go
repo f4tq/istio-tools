@@ -6,7 +6,11 @@ import (
 
 	"github.com/gogo/protobuf/gogoproto"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
+	"fmt"
+	"os"
 )
+
+var _  = gogoproto.E_Benchgen
 
 func init() {
 	generator.RegisterPlugin(NewPlugin())
@@ -53,7 +57,13 @@ func (p *Plugin) Generate(file *generator.FileDescriptor) {
 	unmarshalerName := generator.FileName(file) + "Unmarshaler"
 	for _, message := range file.Messages() {
 		// check to make sure something was generated for this type
-		if !gogoproto.HasTypeDecl(file.FileDescriptorProto, message.DescriptorProto) || len(message.GetOneofDecl()) == 0 {
+		fmt.Fprintf(os.Stderr,"name: %s type %s enums: %d oneofs: %d HasTypeDecl %b \n",  message.GetName(),
+			message.TypeName(),
+			len(message.GetEnumType()),
+			len(message.GetOneofDecl()), gogoproto.HasTypeDecl(file.FileDescriptorProto, message.DescriptorProto))
+
+		if !gogoproto.HasTypeDecl(file.FileDescriptorProto, message.DescriptorProto) ||
+			(len(message.GetOneofDecl()) == 0 && len(message.GetEnumType()) == 0){
 			continue
 		}
 
